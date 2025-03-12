@@ -1,11 +1,21 @@
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import { Canvas, useThree } from "@react-three/fiber";
+import { OrbitControls, PerspectiveCamera, Bvh } from "@react-three/drei";
 import { useControls } from "leva";
 import "./index.css";
 import WobblySphere from "./WobblySphere.jsx";
 import CubeBackground from "./EnvironmentCube";
+
+function ResponsiveCamera() {
+  const { camera, size } = useThree();
+  // Update camera on every size change
+  useEffect(() => {
+    camera.aspect = size.width / size.height;
+    camera.updateProjectionMatrix();
+  }, [camera, size]);
+  return null;
+}
 
 export default function App() {
   // Create Leva controls for the directional light settings.
@@ -15,25 +25,30 @@ export default function App() {
   });
 
   return (
-    <Canvas shadows>
-      <PerspectiveCamera
-        makeDefault
-        fov={45}
-        near={0.1}
-        far={100}
-        position={[5, 2, 15]}
-      />
-      <CubeBackground />
-      <directionalLight
-        // Pass the Leva-controlled values into the light's args.
-        args={[lightColor, lightIntensity]}
-        position={[0.0, 3.0, 5.0]}
-        castShadow
-      />
-      <OrbitControls enableDamping />
-      {/* <Environment files="satara_night_4k.hdr" background /> */}
-      <WobblySphere />
-    </Canvas>
+    <div className="canvas-container">
+      <Canvas shadows>
+        <Bvh>
+          <ResponsiveCamera />
+          <PerspectiveCamera
+            makeDefault
+            fov={45}
+            near={0.1}
+            far={100}
+            position={[5, 2, 15]}
+          />
+          <CubeBackground />
+          <directionalLight
+            // Pass the Leva-controlled values into the light's args.
+            args={[lightColor, lightIntensity]}
+            position={[0.0, 3.0, 5.0]}
+            castShadow
+          />
+          <OrbitControls enableDamping />
+          {/* <Environment files="satara_night_4k.hdr" background /> */}
+          <WobblySphere />
+        </Bvh>
+      </Canvas>
+    </div>
   );
 }
 
